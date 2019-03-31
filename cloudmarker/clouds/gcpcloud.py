@@ -6,9 +6,12 @@ Google Cloud Platform.
 
 
 import json
+import logging
 
 from google.oauth2 import service_account
 from googleapiclient import discovery
+
+_log = logging.getlogger(__name__)
 
 _GCP_SCOPES = ['https://www.googleapis.com/auth/compute.readonly']
 """OAuth 2.0 scopes for Google APIs required by this plugin.
@@ -82,6 +85,9 @@ class GCPCloud:
         # Get firewall resource from the compute resource
         firewall_resource = self._compute_resource.firewalls()
 
+        _log.debug('Fetched firewall resource for project %s',
+                   self._project_name)
+
         firewall_rules = []
         next_page_token = None
 
@@ -118,6 +124,10 @@ class GCPCloud:
         # Get instance resource to get the list of instances for a project and
         # execute that request.
         instance_resource = self._compute_resource.instances()
+
+        _log.debug('Fetched instance resource for project %s',
+                   self._project_name)
+
         instances = []
         next_page_token = None
 
@@ -193,6 +203,10 @@ class GCPCloud:
         firewall_rules = self._get_firewall_rules()
         instances = self._get_instances()
 
+        _log.info('Found %d firewall records for project %s',
+                  len(firewall_rules), self._project_name)
+        _log.info('Found %d instances for project %s',
+                  len(instances), self._project_name)
         for rule in firewall_rules:
             record = {
                 'raw': rule,
